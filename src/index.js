@@ -23,7 +23,7 @@ ws.onclose = function() {
 //
 // Startup
 //
-var _isDown, _points, _strokeID, _r, _g, _rc; // global variables
+var _isDown, _points, _strokeID, _r, _g, _t, _rc, _rt; // global variables
 function onLoadEvent()
 {
     _points = new Array(); // point array for current stroke
@@ -31,13 +31,19 @@ function onLoadEvent()
     _r = new PDollarRecognizer();
 
     var canvas = document.getElementById('myCanvas');
+    var resultCanvas = document.getElementById('resultCanvas');
     _g = canvas.getContext('2d');
     _g.lineWidth = 3;
     _g.font = "16px Gentilis";
+    _t = resultCanvas.getContext('2d');
+    _t.lineWidth = 3;
+    _t.font = "16px Gentilis";
     _rc = getCanvasRect(canvas); // canvas rect on page
+    _rt = getCanvasRect(resultCanvas); // canvas result
     _g.fillStyle = "rgb(255,255,136)";
-    _g.fillRect(0, 0, _rc.width, 20);
-
+    _g.fillRect(0, 0, _rt.width, 20);
+    _t.fillStyle = "rgb(255,255,136)";
+    _t.fillRect(0, 0, _rt.width, 20);
     _isDown = false;
 }
 function getCanvasRect(canvas)
@@ -91,6 +97,7 @@ function mouseDownEvent(x, y, button)
         _g.strokeStyle = clr;
         _g.fillStyle = clr;
         _g.fillRect(x - 4, y - 3, 9, 9);
+        _t.clearRect(0, 20, _rt.width, _rt.height);
     }
     else if (button == 2)
     {
@@ -125,7 +132,10 @@ function mouseUpEvent(x, y, button)
         {
             var result = _r.Recognize(_points);
             drawText("Result: " + result.Name + " (" + round(result.Score,2) + ").");
-
+            console.log(result);
+            _t.clearRect(0, 0, _rt.width, _rt.height);
+            drawText("匹配结果：" + result.Name, _t);
+            drawResultPoint(result.path);
             var gesObj = new Object();
             gesObj.action = "gesture";
             gesObj.points = _points;
@@ -146,13 +156,44 @@ function drawConnectedPoint(from, to)
     _g.closePath();
     _g.stroke();
 }
-function drawText(str)
+
+function drawResultPoint(points)
 {
-    _g.fillStyle = "rgb(255,255,136)";
-    _g.fillRect(0, 0, _rc.width, 20);
-    _g.fillStyle = "rgb(0,0,255)";
-    _g.fillText(str, 1, 14);
+    var centerPoint = Centroid(points);
+    var canvasCenterX = _rt.width / 2;
+    var canvasCenterY = _rt.height / 2;
+    var changeX = canvasCenterX - centerPoint.X;
+    var changeY = canvasCenterY - centerPoint.Y;
+    console.log(changeX,changeY);
+    if (Array.isArray(points) && points.length > 1)
+    {
+        var index = 1;
+        while(index < points.length)
+        {
+            if (points[index - 1].ID === points[index].ID)
+            {
+                _t.beginPath();
+                _t.moveTo(points[index - 1].X + changeX, points[index - 1].Y + changeY);
+                _t.lineTo(points[index].X + changeX, points[index].Y + changeY);
+                _t.closePath();
+                _t.stroke();
+            }
+            index ++;
+        }
+    }
 }
+
+function drawText(str, $_g = _g)
+{
+    $_g.clearRect(0, 0, _rc.width, 20);
+    $_g.fillStyle = "rgb(255,255,136)";
+    $_g.fillRect(0, 0, _rc.width, 20);
+    $_g.fillStyle = "rgb(0,0,255)";
+    $_g.fillText(str, 1, 14);
+}
+
+
+
 function rand(low, high)
 {
     return Math.floor((high - low + 1) * Math.random()) + low;

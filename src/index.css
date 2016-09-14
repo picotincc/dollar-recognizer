@@ -99,10 +99,12 @@ input[type="text"] {
   flex: 1 0 auto;
   display: flex;
 }
-#Content > main > section > .main-area > .draw-area {
+#Content > main > section > .main-area > .draw-area,
+#Content > main > section > .main-area .result-area {
   flex: 0 0 500px;
 }
-#Content > main > section > .main-area > .draw-area > canvas {
+#Content > main > section > .main-area > .draw-area > canvas,
+#Content > main > section > .main-area .result-area > canvas {
   margin-left: 40px;
   margin-right: 40px;
   margin-top: 20px;

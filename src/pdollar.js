@@ -1,62 +1,3 @@
-/**
- * The $P Point-Cloud Recognizer (JavaScript version)
- *
- * 	Radu-Daniel Vatavu, Ph.D.
- *	University Stefan cel Mare of Suceava
- *	Suceava 720229, Romania
- *	vatavu@eed.usv.ro
- *
- *	Lisa Anthony, Ph.D.
- *      UMBC
- *      Information Systems Department
- *      1000 Hilltop Circle
- *      Baltimore, MD 21250
- *      lanthony@umbc.edu
- *
- *	Jacob O. Wobbrock, Ph.D.
- * 	The Information School
- *	University of Washington
- *	Seattle, WA 98195-2840
- *	wobbrock@uw.edu
- *
- * The academic publication for the $P recognizer, and what should be 
- * used to cite it, is:
- *
- *	Vatavu, R.-D., Anthony, L. and Wobbrock, J.O. (2012).  
- *	  Gestures as point clouds: A $P recognizer for user interface 
- *	  prototypes. Proceedings of the ACM Int'l Conference on  
- *	  Multimodal Interfaces (ICMI '12). Santa Monica, California  
- *	  (October 22-26, 2012). New York: ACM Press, pp. 273-280.
- *
- * This software is distributed under the "New BSD License" agreement:
- *
- * Copyright (c) 2012, Radu-Daniel Vatavu, Lisa Anthony, and 
- * Jacob O. Wobbrock. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *    * Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of the University Stefan cel Mare of Suceava, 
- *	University of Washington, nor UMBC, nor the names of its contributors 
- *	may be used to endorse or promote products derived from this software 
- *	without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
- * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL Radu-Daniel Vatavu OR Lisa Anthony
- * OR Jacob O. Wobbrock BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, 
- * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
-**/
 //
 // Point class
 //
@@ -72,6 +13,7 @@ function Point(x, y, id) // constructor
 function PointCloud(name, points) // constructor
 {
 	this.Name = name;
+    this.originPoints = points.slice(0);
 	this.Points = Resample(points, NumPoints);
 	this.Points = Scale(this.Points);
 	this.Points = TranslateTo(this.Points, Origin);
@@ -173,7 +115,7 @@ function PDollarRecognizer() // constructor
 		points = Resample(points, NumPoints);
 		points = Scale(points);
 		points = TranslateTo(points, Origin);
-		
+
 		var b = +Infinity;
 		var u = -1;
 		for (var i = 0; i < this.PointClouds.length; i++) // for each point-cloud template
@@ -184,11 +126,12 @@ function PDollarRecognizer() // constructor
 				u = i; // point-cloud
 			}
 		}
-		return (u == -1) ? new Result("No match.", 0.0) : new Result(this.PointClouds[u].Name, Math.max((b - 2.0) / -2.0, 0.0));
+		return (u == -1) ? new Result("No match.", 0.0) : Object.assign({path: this.PointClouds[u].originPoints}, new Result(this.PointClouds[u].Name, Math.max((b - 2.0) / -2.0, 0.0)));
 	};
 	this.AddGesture = function(name, points)
 	{
 		this.PointClouds[this.PointClouds.length] = new PointCloud(name, points);
+        console.log(this.PointClouds);
 		var num = 0;
 		for (var i = 0; i < this.PointClouds.length; i++) {
 			if (this.PointClouds[i].Name == name)
@@ -245,9 +188,9 @@ function CloudDistance(pts1, pts2, start)
 	} while (i != start);
 	return sum;
 }
-function Resample(points, n)
+function Resample(points, n) //调整points的分布，尽量以相同间隔分布
 {
-	var I = PathLength(points) / (n - 1); // interval length
+	var I = PathLength(points) / (n - 1); // interval distance
 	var D = 0.0;
 	var newpoints = new Array(points[0]);
 	for (var i = 1; i < points.length; i++)
@@ -261,7 +204,7 @@ function Resample(points, n)
 				var qy = points[i - 1].Y + ((I - D) / d) * (points[i].Y - points[i - 1].Y);
 				var q = new Point(qx, qy, points[i].ID);
 				newpoints[newpoints.length] = q; // append new point 'q'
-				points.splice(i, 0, q); // insert 'q' at position i in points s.t. 'q' will be the next i
+				points.splice(i, 0, q); // insert 'q' at position i in points s.t. 'q' will be the next i insert q
 				D = 0.0;
 			}
 			else D += d;
@@ -271,7 +214,7 @@ function Resample(points, n)
 		newpoints[newpoints.length] = new Point(points[points.length - 1].X, points[points.length - 1].Y, points[points.length - 1].ID);
 	return newpoints;
 }
-function Scale(points)
+function Scale(points)  // 计算points scale 计算最大坐标差 压缩坐标值
 {
 	var minX = +Infinity, maxX = -Infinity, minY = +Infinity, maxY = -Infinity;
 	for (var i = 0; i < points.length; i++) {
@@ -280,6 +223,7 @@ function Scale(points)
 		maxX = Math.max(maxX, points[i].X);
 		maxY = Math.max(maxY, points[i].Y);
 	}
+
 	var size = Math.max(maxX - minX, maxY - minY);
 	var newpoints = new Array();
 	for (var i = 0; i < points.length; i++) {
@@ -289,7 +233,7 @@ function Scale(points)
 	}
 	return newpoints;
 }
-function TranslateTo(points, pt) // translates points' centroid
+function TranslateTo(points, pt) // translates points' centroid //去中心点 pt不知是啥
 {
 	var c = Centroid(points);
 	var newpoints = new Array();
@@ -300,7 +244,7 @@ function TranslateTo(points, pt) // translates points' centroid
 	}
 	return newpoints;
 }
-function Centroid(points)
+function Centroid(points) // 中心点 平均值
 {
 	var x = 0.0, y = 0.0;
 	for (var i = 0; i < points.length; i++) {
@@ -311,14 +255,14 @@ function Centroid(points)
 	y /= points.length;
 	return new Point(x, y, 0);
 }
-function PathDistance(pts1, pts2) // average distance between corresponding points in two paths
+function PathDistance(pts1, pts2) // average distance between corresponding points in two paths // 两个points平均偏移距离
 {
 	var d = 0.0;
 	for (var i = 0; i < pts1.length; i++) // assumes pts1.length == pts2.length
 		d += Distance(pts1[i], pts2[i]);
 	return d / pts1.length;
 }
-function PathLength(points) // length traversed by a point path
+function PathLength(points) // length traversed by a point path //相同ID的前后两个点的距离和
 {
 	var d = 0.0;
 	for (var i = 1; i < points.length; i++)
