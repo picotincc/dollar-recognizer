@@ -1,0 +1,102 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>$P Recognizer</title>
+    <link rel="stylesheet" href="index.css" charset="utf-8">
+    <script type="text/javascript" src="pdollar.js"></script>
+    <script src="index.js" charset="utf-8"></script>
+
+</head>
+
+<body onload="onLoadEvent()">
+    <div id="Content">
+        <header><p>Dollar Recognizer</p></header>
+        <main>
+            <aside>
+                <div class="input-group">
+                    <input type="radio" name="search" id="useGSS" checked>
+                    <span>Use Golden Section Search
+                        <i>(original)</i>
+                    </span>
+                    </input>
+                    <br />
+                    <input type="radio" name="search" id="useProtractor">
+                    <span>Use Protractor
+                        <i>(faster)</i>
+                    </span>
+                    </input>
+                </div>
+                <div class="samples">
+                    图形样例
+                </div>
+            </aside>
+            <section>
+                <div class="annotation">
+                    <p>
+                        <i>Make strokes on this canvas.
+                            <b><u>Right-click</u> the canvas to recognize.</b>
+                            If a misrecognition occurs, add the mis- recognized gesture
+                            as an example of the intended gesture.
+                        </i>
+                    </p>
+                    <div class="clear-button">
+                        <button type="button" value=" Clear " onclick="onClickClearStrokes()">Clear</button>
+                    </div>
+                </div>
+                <div class="main-area">
+                    <div class="draw-area">
+                        <canvas id="myCanvas"
+                            onmousedown="mouseDownEvent(event.clientX, event.clientY, event.button)"
+                            onmousemove="mouseMoveEvent(event.clientX, event.clientY, event.button)"
+                            onmouseup="mouseUpEvent(event.clientX, event.clientY, event.button)"
+                            oncontextmenu="return false;">
+                            <span style="background-color:#ffff88;">The &lt;canvas&gt; element is not supported by this browser.</span>
+                        </canvas>
+                    </div>
+                    <div class="result-area">
+                        匹配结果
+                    </div>
+                </div>
+                <div class="operation-area">
+                    <div class="bar">
+                        <span>Add as example of existing type:</span>
+                        <select id="pointclouds" style="width:136px" onkeypress="if (event.keyCode == 13) onClickAddExisting()">
+                            <option selected="" value="T">T</option>
+                            <option value="N">N</option>
+                            <option value="D">D</option>
+                            <option value="P">P</option>
+                            <option value="X">X</option>
+                            <option value="H">H</option>
+                            <option value="I">I</option>
+                            <option value="exclamation">exclamation</option>
+                            <option value="line">line</option>
+                            <option value="five-point star">five-point star</option>
+                            <option value="null">null</option>
+                            <option value="arrowhead">arrowhead</option>
+                            <option value="pitchfork">pitchfork</option>
+                            <option value="six-point star">six-point star</option>
+                            <option value="asterisk">asterisk</option>
+                            <option value="half-note">half-note</option>
+                        </select>
+                        <button type="button" name="add-existed" onclick="onClickAddExisting()">Add</button>
+                    </div>
+                    <div class="bar">
+                        <span>Add as example of custom type:</span>
+                        <input type="text" name="custom-name" value="" id="custom" onclick="onClickCustom()" onkeypress="if (event.keyCode == 13) onClickAddCustom()">
+                        <button type="button" name="add-custom" onclick="onClickAddCustom()">Add</button>
+                    </div>
+                    <div class="bar">
+                        <span>Delete all user-defined gestures:</span>
+                        <button type="button" name="delete" onclick="onClickDelete()">Delete</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+        <footer></footer>
+    </div>
+</body>
+
+
+</html>

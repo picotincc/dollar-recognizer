@@ -42,6 +42,7 @@ function onLoadEvent()
 }
 function getCanvasRect(canvas)
 {
+    console.log(canvas);
     var w = canvas.width;
     var h = canvas.height;
 
@@ -53,6 +54,7 @@ function getCanvasRect(canvas)
         cx += canvas.offsetLeft;
         cy += canvas.offsetTop;
     }
+    console.log({x: cx, y: cy, width: w, height: h});
     return {x: cx, y: cy, width: w, height: h};
 }
 function getScrollY()
