@@ -40,10 +40,8 @@ function onLoadEvent()
     _t.font = "16px Gentilis";
     _rc = getCanvasRect(canvas); // canvas rect on page
     _rt = getCanvasRect(resultCanvas); // canvas result
-    _g.fillStyle = "rgb(255,255,136)";
-    _g.fillRect(0, 0, _rt.width, 20);
-    _t.fillStyle = "rgb(255,255,136)";
-    _t.fillRect(0, 0, _rt.width, 20);
+    drawText("please input: ", _g);
+    drawText("matched result: ", _t);
     _isDown = false;
 }
 function getCanvasRect(canvas)
@@ -134,8 +132,9 @@ function mouseUpEvent(x, y, button)
             drawText("Result: " + result.Name + " (" + round(result.Score,2) + ").");
             console.log(result);
             _t.clearRect(0, 0, _rt.width, _rt.height);
-            drawText("匹配结果：" + result.Name, _t);
+            drawText("matched result: " + result.Name, _t);
             drawResultPoint(result.path);
+            
             var gesObj = new Object();
             gesObj.action = "gesture";
             gesObj.points = _points;
