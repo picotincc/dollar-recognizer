@@ -63,6 +63,7 @@ wss.on('connection', function (ws) {
                     resultObj.action = "result";
                     resultObj.result = myRecog.Recognize(message_obj.points, false);
                     resultObj.points = message_obj.points;
+                    console.log(resultObj.result);
                     wss.broadcast(JSON.stringify(resultObj));
                 }
 
@@ -189,6 +190,7 @@ var Origin = new Point(0,0,0);
 function PointCloud(name, points) // constructor
 {
     this.Name = name;
+    this.originPoints = points.slice(0);
     this.Points = Resample(points, NumPoints);
     this.Points = Scale(this.Points);
     this.Points = TranslateTo(this.Points, new Point(0,0,0));
@@ -295,7 +297,8 @@ function PDollarRecognizer() // constructor
                 u = i; // point-cloud
             }
         }
-        return (u == -1) ? new Result("No match.", 0.0) : new Result(this.PointClouds[u].Name, Math.max((b - 2.0) / -2.0, 0.0));
+        console.log("xxxx");
+        return (u == -1) ? new Result("No match.", 0.0) : Object.assign({path: this.PointClouds[u].originPoints}, new Result(this.PointClouds[u].Name, Math.max((b - 2.0) / -2.0, 0.0)));
     };
     this.AddGesture = function(name, points)
     {

@@ -12,6 +12,12 @@ ws.onmessage = function(evt) {
     switch (received_msg_obj.action) {
         case "loadLayout":
             break;
+        case "result":
+            drawText("Result: " + received_msg_obj.result.Name + " (" + round(received_msg_obj.result.Score,2) + ").");
+            drawText("matched result: " + received_msg_obj.result.Name, _t);
+            console.log(received_msg_obj.result, "path");
+            drawResultPoint(received_msg_obj.result.path);
+            break;
         default:
     }
 };
@@ -128,13 +134,13 @@ function mouseUpEvent(x, y, button)
     {
         if (_points.length >= 10)
         {
-            var result = _r.Recognize(_points);
-            drawText("Result: " + result.Name + " (" + round(result.Score,2) + ").");
-            console.log(result);
+            // var result = _r.Recognize(_points);
+            // drawText("Result: " + result.Name + " (" + round(result.Score,2) + ").");
+            // console.log(result);
             _t.clearRect(0, 0, _rt.width, _rt.height);
-            drawText("matched result: " + result.Name, _t);
-            drawResultPoint(result.path);
-            
+            // drawText("matched result: " + result.Name, _t);
+            // drawResultPoint(result.path);
+
             var gesObj = new Object();
             gesObj.action = "gesture";
             gesObj.points = _points;
