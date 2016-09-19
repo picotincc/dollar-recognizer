@@ -18,6 +18,9 @@ ws.onmessage = function(evt) {
             console.log(received_msg_obj.result, "path");
             drawResultPoint(received_msg_obj.result.path);
             break;
+        case "init":
+          var gestures = received_msg_obj.result;
+          break;
         default:
     }
 };
