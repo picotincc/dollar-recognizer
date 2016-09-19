@@ -3,11 +3,11 @@ var ip = "localhost";
 ws = new WebSocket("ws://" + ip + ":8080");
 ws.onopen = function() {
     // Web Socket is connected, send data using send()
-
+    initSamples();
 };
 ws.onmessage = function(evt) {
     var received_msg = evt.data;
-    console.log(received_msg);
+    // console.log(received_msg);
     var received_msg_obj = JSON.parse(received_msg);
     switch (received_msg_obj.action) {
         case "loadLayout":
@@ -15,15 +15,18 @@ ws.onmessage = function(evt) {
         case "result":
             drawText("Result: " + received_msg_obj.result.Name + " (" + round(received_msg_obj.result.Score,2) + ").");
             drawText("matched result: " + received_msg_obj.result.Name, _t);
-            console.log(received_msg_obj.result, "path");
+            // console.log(received_msg_obj.result, "path");
             drawResultPoint(received_msg_obj.result.path);
             break;
         case "init":
           var gestures = received_msg_obj.result;
+          console.log("init", gestures);
+          showExistGestures(gestures);
           break;
         default:
     }
 };
+
 
 ws.onclose = function() {
     // websocket is closed.
@@ -65,9 +68,29 @@ function getCanvasRect(canvas)
         cx += canvas.offsetLeft;
         cy += canvas.offsetTop;
     }
-    console.log({x: cx, y: cy, width: w, height: h}, "坐标");
+    // console.log({x: cx, y: cy, width: w, height: h}, "坐标");
     return {x: cx, y: cy, width: w, height: h};
 }
+
+//init Samples
+function initSamples()
+{
+    var initAction = {
+        action: "init"
+    };
+    ws.send(JSON.stringify(initAction));
+}
+
+function showExistGestures(gestures)
+{
+    var selectObj = document.getElementById("pointclouds");
+    gestures.forEach(item =>　{
+        var varItem = new Option(item.name, item.name);
+        selectObj.options.add(varItem);
+    });
+}
+
+
 function getScrollY()
 {
     var scrollY = 0;
@@ -172,7 +195,7 @@ function drawResultPoint(points)
     var canvasCenterY = _rt.height / 2;
     var changeX = canvasCenterX - centerPoint.X;
     var changeY = canvasCenterY - centerPoint.Y;
-    console.log(changeX,changeY);
+    // console.log(changeX,changeY);
     if (Array.isArray(points) && points.length > 1)
     {
         var index = 1;
@@ -238,6 +261,11 @@ function onClickAddCustom()
         custgesObj.points = _points;
         custgesObj.name = name;
         ws.send(JSON.stringify(custgesObj));
+
+        var selectObj = document.getElementById("pointclouds");
+        var varItem = new Option(name, name);
+        selectObj.options.add(varItem);
+
     }
 }
 function onClickCustom()
