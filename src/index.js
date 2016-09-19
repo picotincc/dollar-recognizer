@@ -246,6 +246,11 @@ function onClickAddExisting()
         var num = _r.AddGesture(name, _points);
         drawText("\"" + name + "\" added. Number of \"" + name + "\"s defined: " + num + ".");
         _strokeID = 0; // signal to begin new gesture on next mouse-down
+        var custgesObj = new Object();
+        custgesObj.action = "custGesture";
+        custgesObj.points = _points;
+        custgesObj.name = name;
+        ws.send(JSON.stringify(custgesObj));
     }
 }
 function onClickAddCustom()
