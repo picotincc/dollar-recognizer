@@ -69,6 +69,12 @@ wss.on('connection', function (ws) {
 
                 //                    console.log(custGestureObj);
                 break;
+            case "init":
+                var resultObj = new Object();
+                resultObj.action = "init";
+                resultObj.result = getExistedGestures();
+                wss.broadcast(JSON.stringify(resultObj));
+                break;
             default:
             }
         } catch (err) {
@@ -90,6 +96,15 @@ function addExistedGestures() {
         }
     }
     //    console.log(myRecog);
+}
+
+function getExistedGestures(){
+  var fileReadStr = fs.readFileSync(filepath + "custGesture").toString();
+  var existedGestures;
+  if (fileReadStr != "") {
+      existedGestures = JSON.parse(fs.readFileSync(filepath + "custGesture").toString());
+  }
+  return existedGestures;
 }
 
 wss.broadcast = function (data) {
